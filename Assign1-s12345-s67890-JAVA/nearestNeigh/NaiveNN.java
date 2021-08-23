@@ -28,7 +28,8 @@ public class NaiveNN implements NearestNeigh{
         	for (ListIterator<Point> iter = indexCopy.listIterator(); iter.hasNext(); ) {
         		Point point = iter.next();
         		double distTo = point.distTo(searchTerm);
-        		if (nextNN == null || distTo < searchTerm.distTo(nextNN)) {
+        		if (nextNN == null || (distTo < searchTerm.distTo(nextNN) && 
+        				point.cat == searchTerm.cat)) {
         			nextNN = point;
         		}
         	}
