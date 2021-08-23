@@ -51,10 +51,10 @@ public class NaiveNN implements NearestNeigh{
     @Override
     public boolean deletePoint(Point point) {
         if (index.contains(point)) {
-        	return false;
-        } else {
         	index.remove(point);
         	return true;
+        } else {
+        	return false;
         }
     }
 
