@@ -53,14 +53,88 @@ public class KDTreeNN implements NearestNeigh{
 
     @Override
     public boolean deletePoint(Point point) {
-    	if (pointList.contains(point)){
-    		pointList.remove(point);
-    		return true;
+        if (root == null)
+            return false;
+    	if (isPointIn(point) == false) {
+    		return false;
     	}
-    	return false;
+        root = deleteNode(point, root, true);
+        return true;
+
     }
 
-    @Override
+    public KDNode deleteNode(Point point, KDNode node, boolean checkLat) {
+    	
+    	if (isPointIn(point) == false) {
+    		return null;
+    	}
+    	KDNode currentNode = root;
+    	if (currentNode.point.equals(point)) {
+    		
+    		if(currentNode.rightChild != null)
+    		{
+    		//find min of roots right subtree
+    		KDNode rightMin = findMin(currentNode.rightChild, cd);
+    		//copy the min root
+    		currentNode.point = rightMin.point;
+    		
+    		//recurviley to delete min
+    		 currentNode.rightChild = deleteNode(currentNode.rightChild, rightMin, depth+1);
+    		}
+    		else if(currentNode.leftChild != null) {
+        		//find min of roots right subtree
+        		KDNode leftMin = findMin(currentNode.leftChild, cd);
+        		//copy the min root
+        		currentNode.point = leftMin.point;
+        		
+        		//recurviley to delete min
+        		 currentNode.rightChild = deleteNode(currentNode.leftChild, leftMin, depth+1);
+    		}
+    		else { //leaf node
+    			return null;
+    		}
+    	}
+    	return root;
+    	if (checkLat == true) {
+    		if (point.lat < currentNode.point.lat)
+    		{
+    			currentNode.leftChild = deleteNode(point, currentNode.leftChild, false);
+    		}
+    		else {
+    			currentNode.rightChild = deleteNode(point, currentNode.rightChild, false);
+    		}
+    	}else {
+    		if (point.lon < currentNode.point.lon)
+        	{
+        		currentNode.leftChild = deleteNode(point, currentNode.leftChild, true);
+        	}
+        	else {
+        		currentNode.rightChild = deleteNode(point, currentNode.rightChild, true);
+        	}
+    	}
+    }
+    
+
+    private KDNode findMinimum(KDNode root, int targetDim, int currDim) {
+        if (root == null)
+            return null;
+        if (targetDim == currDim) {
+            if (root.left == null)
+                return root;
+            // else
+            return findMinimum(root.left, targetDim, (currDim + 1) % dim);
+        }
+        Node rightMin = findMinimum(root.right, targetDim, (currDim + 1) % dim);
+        Node leftMin = findMinimum(root.left, targetDim, (currDim + 1) % dim);
+        Node res = root;
+        if (rightMin != null && rightMin.point[targetDim] < res.point[targetDim])
+            res = rightMin;
+        if (leftMin != null && leftMin.point[targetDim] < res.point[targetDim])
+            res = leftMin;
+        return res;
+    }
+
+	@Override
     public boolean isPointIn(Point point) {
 
         boolean isLatitude = true;
