@@ -10,11 +10,9 @@ import java.util.List;
  */
 public class KDTreeNN implements NearestNeigh{
 	
-	List<Point> pointList;
+	private List<Point> pointList;
     
-	KDNode root; 
-	boolean checkLat = true;
-	String lol = "lat";
+	private KDNode root; 
 	
 	@Override
     public void buildIndex(List<Point> points) {
@@ -36,22 +34,30 @@ public class KDTreeNN implements NearestNeigh{
     @Override
     public boolean addPoint(Point point) {
         //REVISE THIS
-    	if (pointList.contains(point)){
-    		return false;
-    	}
-    	
-    	KDNode currentNode = root;
-    	if (root == null) {
-            root = new KDNode(point, null, null, null);
-        //2nd depth
-    	} else if (point.lat < root.point.lon) {
-            root.leftChild = new KDNode(point, root, null,null);
-        } else {
-            root.rightChild = new KDNode(point, root, null,null);;
-        }
-
-    
+    	insertNode(point, root, true);
     	return true;
+    }
+    
+    public boolean insertNode(Point point, KDNode node, boolean checkLat) {
+    	if (node == null) {
+    		node = new KDNode(point, null, null, null);
+    		return true;
+    	} else if (root.point == point) {
+    		return false;
+    	} else if (checkLat) {
+    		if (point.lat < node.point.lat) {
+    			insertNode(point, node.leftChild, false);
+    		} else {
+    			insertNode(point, node.rightChild, false);
+    		}
+    	} else {
+    		if (point.lon < node.point.lon) {
+    			insertNode(point, node.leftChild, true);
+    		} else {
+    			insertNode(point, node.rightChild, true);
+    		}
+    	}
+    	return false;
     }
 
     @Override
@@ -211,10 +217,10 @@ public class KDTreeNN implements NearestNeigh{
 
 //KD NODE CLASS
 class KDNode {
-    Point point;
-    KDNode parent;
-    KDNode leftChild;
-    KDNode rightChild;
+    public Point point;
+    public KDNode parent;
+    public KDNode leftChild;
+    public KDNode rightChild;
     
     public KDNode (Point point, KDNode parent, KDNode leftChild, KDNode rightChild) {
     	this.point = point;
@@ -222,20 +228,21 @@ class KDNode {
     	this.leftChild = leftChild;
     	this.rightChild = rightChild;
     }
-    
 
-//	public KDNode getLeftChild(KDNode parent)
-//    {
-//    	this.parent = parent;
-//    	return parent.leftChild;
+//  Removed encapsulation and getter/setter methods for now. Can change this back if we have time l8r
+//
+//	public KDNode getLeftChild() {
+//    	return leftChild;
 //    }    
 //	
-//	public KDNode getRightChild(KDNode parent) {
-//    	this.parent = parent;
-//    	return parent.rightChild;
+//	public KDNode getRightChild() {
+//    	return rightChild;
 //		
 //	}
-
+//
+//	public Point getPoint() {
+//		return point;
+//	}
 }
 
 
