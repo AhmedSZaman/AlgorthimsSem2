@@ -28,7 +28,8 @@ public class KDTreeNN implements NearestNeigh{
     public List<Point> search(Point searchTerm, int k) {
        //get search term and find k amount of nearest neighbours
     	//implemnt KD tree
-
+    	List<Point> nearestNeighbours = new ArrayList<Point>();
+    	
         return new ArrayList<Point>();
     }
 
@@ -44,9 +45,9 @@ public class KDTreeNN implements NearestNeigh{
             root = new KDNode(point, null, null, null);
         //2nd depth
     	} else if (point.lat < root.point.lon) {
-            root.left = new KDNode(point, root, null,null);
+            root.leftChild = new KDNode(point, root, null,null);
         } else {
-            root.right = new KDNode(point, root, null,null);;
+            root.rightChild = new KDNode(point, root, null,null);;
         }
 
     
@@ -80,7 +81,6 @@ public class KDTreeNN implements NearestNeigh{
     		{
     		//find min of roots right subtree
     		KDNode rightMin = findMinimum(currentNode.rightChild, currentDim, true);
-    		
     		//copy the min root
     		currentNode.point = rightMin.point;
     		
@@ -90,7 +90,7 @@ public class KDTreeNN implements NearestNeigh{
     		
     		else if(currentNode.leftChild != null) {	
     			//find min of roots right subtree
-        		KDNode leftMin = findMinimium(currentNode.leftChild, cd);
+    			KDNode leftMin = findMinimum(currentNode.leftChild, currentDim, true);
         		
         		//copy the min root
         		currentNode.point = leftMin.point;
@@ -101,8 +101,10 @@ public class KDTreeNN implements NearestNeigh{
     		else { //leaf node
     			return null;
     		}
+    		return root;
     	}
-    	return root;
+    	
+    	
     	if (checkLat == true)
     	{
     		if (point.lat < currentNode.point.lat)
@@ -117,6 +119,7 @@ public class KDTreeNN implements NearestNeigh{
         	else 
         		currentNode.rightChild = deleteNode(point, currentNode.rightChild, true);
     	}
+    	return root;
     }
     
 
@@ -187,7 +190,23 @@ public class KDTreeNN implements NearestNeigh{
         return false;
     }
 
-	
+	private List<KDNode> nearestNeighbour(KDNode root, Point searchTerm, boolean checkLat, List<KDNode> nearestList, int k)
+	{
+		double currentDist = root.point.distTo(searchTerm);
+		List<KDNode> newNearestList = nearestList;
+		
+		KDNode compareNode = nearestList.get(k-1);
+		double compareDist = root.point.distTo(compareNode.point);
+		
+		if(nearestList.size() < k || currentDist < compareDist )
+		{
+			nearestList.add(root);
+			//NearestList = SELECTIONSORT
+		}
+		
+		
+		
+	}
 }
 
 //KD NODE CLASS
@@ -205,17 +224,17 @@ class KDNode {
     }
     
 
-	public KDNode getLeftChild(KDNode parent)
-    {
-    	this.parent = parent;
-    	return parent.leftChild;
-    }    
-	
-	public KDNode getRightChild(KDNode parent) {
-    	this.parent = parent;
-    	return parent.rightChild;
-		
-	}
+//	public KDNode getLeftChild(KDNode parent)
+//    {
+//    	this.parent = parent;
+//    	return parent.leftChild;
+//    }    
+//	
+//	public KDNode getRightChild(KDNode parent) {
+//    	this.parent = parent;
+//    	return parent.rightChild;
+//		
+//	}
 
 }
 
