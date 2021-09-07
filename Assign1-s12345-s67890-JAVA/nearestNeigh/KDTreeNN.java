@@ -52,18 +52,21 @@ public class KDTreeNN implements NearestNeigh{
 
     @Override
     public boolean addPoint(Point point) {
-    	List<KDNode> visitedPoints = new ArrayList<KDNode>();
+//    	List<KDNode> visitedPoints = new ArrayList<KDNode>();
     	if (isPointIn(point)) {
     		return false;}
     	else {
     	KDNode rootNode = getRootNodeCat(point);
-    	insertNode(point, rootNode, rootNode, true, visitedPoints);
+    	insertNode(point, rootNode, rootNode, true);
     	
     	return true;
     	}	
     }
     
-    public boolean insertNode(Point point, KDNode currentNode, KDNode rootNode, boolean checkLat, List<KDNode> visitedPoints) {
+    // TODO: fix null pointer exception. Possibly because the the child could be null, but we are trying to check the ".point" value
+    // of the child before checking if its null.
+    // Also, addPoint doesn't fail when the node is already in the kdtree.
+    public boolean insertNode(Point point, KDNode currentNode, KDNode rootNode, boolean checkLat) {
     	
     	//System.out.println(rootNode);
     	if (rootNode == null) {
@@ -74,28 +77,59 @@ public class KDTreeNN implements NearestNeigh{
     		else
     			rootHospital = new KDNode(point, null, null, null);
     		return true;
-    	} else if (currentNode == null) {
-    		int index = visitedPoints.size() - 1;
-    		currentNode = new KDNode(point, visitedPoints.get(index), null, null);
-    	}
-    	else if (checkLat) {
-    		visitedPoints.add(currentNode);
-    		if (point.lat < currentNode.point.lat) {
-    			insertNode(point, currentNode.leftChild, rootNode, false, visitedPoints);
-    		} else {
-    			insertNode(point, currentNode.rightChild, rootNode, false, visitedPoints);
-    		}
     	} else {
-    		visitedPoints.add(currentNode);
-    		if (point.lon < currentNode.point.lon) {
-    			insertNode(point, currentNode.leftChild,rootNode, true, visitedPoints);
-    		} else {
-    			insertNode(point, currentNode.rightChild, rootNode, true, visitedPoints);
+    		
+    		
+    		// Inverses dimension because we are figuring out which child sub tree the point belongs in.
+    		// checkLat is one layer behind!!!!!
+    		if (checkLat) {
+    			// Checks if the point belongs in the right child subtree
+    			if (point.lon > currentNode.point.lon) {
+    				// If right child subtree is null/empty, creates a new node for the current point in the right
+    				// child reference.
+    				if (currentNode.rightChild == null) {
+    					currentNode.rightChild = new KDNode(point, currentNode, null, null);
+    					return true;
+    				} 
+    				// Calls the insert node method on the right child node.
+    				else {
+    					insertNode(point, currentNode.rightChild, rootNode, !checkLat);
+    				}
+    			} else {
+    				if (currentNode.leftChild == null) {
+    					currentNode.leftChild = new KDNode(point, currentNode, null, null);
+    					return true;
+    				}
+    				else {
+    					insertNode(point, currentNode.leftChild, rootNode, !checkLat);
+    				}
+    			}
     		}
+    		// Checks latitude if current node is ordered by longitude
+    		else {
+    			if (point.lat > currentNode.point.lat) {
+    				if (currentNode.rightChild == null) {
+    					currentNode.rightChild = new KDNode(point, currentNode, null, null);
+    					return true;
+    				} 
+    				// Calls the insert node method on the right child node.
+    				else {
+    					insertNode(point, currentNode.rightChild, rootNode, !checkLat);
+    				}
+    			} else {
+    				if (currentNode.leftChild == null) {
+    					currentNode.leftChild = new KDNode(point, currentNode, null, null);
+    					return true;
+    				}
+    				else {
+    					insertNode(point, currentNode.leftChild, rootNode, !checkLat);
+    				}
+    			}
+    		}
+    		
     	}
-    	return false;
+		return false;
     }
-    
     
 
 

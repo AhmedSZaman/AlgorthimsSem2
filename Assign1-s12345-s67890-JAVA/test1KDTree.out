@@ -1,4 +1,16 @@
+Point{id=id0, cat=RESTAURANT, lat=-37.3159209067, lon=147.812377025}
+Point{id=id918, cat=RESTAURANT, lat=-36.6799321894, lon=148.852692465}
+Point{id=id43, cat=RESTAURANT, lat=-36.8508589357, lon=148.764602774}
+Point{id=id930, cat=RESTAURANT, lat=-36.6882369655, lon=149.486558888}
+Point{id=id2, cat=RESTAURANT, lat=-37.8755585094, lon=149.019433308}
+Point{id=id115, cat=RESTAURANT, lat=-38.3314290053, lon=149.448357419}
 Delete point failed.
+Point{id=id0, cat=RESTAURANT, lat=-37.3159209067, lon=147.812377025}
+Point{id=id918, cat=RESTAURANT, lat=-36.6799321894, lon=148.852692465}
+Point{id=id43, cat=RESTAURANT, lat=-36.8508589357, lon=148.764602774}
+Point{id=id930, cat=RESTAURANT, lat=-36.6882369655, lon=149.486558888}
+Point{id=id2, cat=RESTAURANT, lat=-37.8755585094, lon=149.019433308}
+Point{id=id115, cat=RESTAURANT, lat=-38.3314290053, lon=149.448357419}
 Delete point failed.
 false
 false
