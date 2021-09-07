@@ -11,14 +11,19 @@ import java.util.List;
 public class KDTreeNN implements NearestNeigh{
 	
     
-	private boolean checkLat = true;
-	private KDNode root; 
+	//private boolean checkLat = true;
+	private KDNode rootHospital;
+	private KDNode rootEducation;
+	private KDNode rootResturant;
 	
 	@Override
     public void buildIndex(List<Point> points) {
         		
         for (Point p: points)
-        { addPoint(p);}
+        {  addPoint(p);
+        }
+       // System.out.println(rootResturant.leftChild.point );
+       // System.out.println(rootResturant.rightChild.point.toString()  );
         //build a tree
     }
 
@@ -28,46 +33,64 @@ public class KDTreeNN implements NearestNeigh{
     	//implemnt KD tree
     	List<PointDist> nearestNeighbours = new ArrayList<PointDist>();
     	List<Point>		nearestPoints = new ArrayList<Point>();
-    	nearestNeighbours = nearestNeighbour(root, searchTerm, true , null, k);
     	
-    	for (PointDist p: nearestNeighbours)
-    		nearestPoints.add(p.pointInList);
-        
+    	nearestNeighbours = nearestNeighbour(getRootNodeCat(searchTerm), searchTerm, true , nearestNeighbours, k);
+    	
+    	//fix this
+    	if (nearestNeighbours != null)
+    	{  for (PointDist p: nearestNeighbours)
+    		{nearestPoints.add(p.pointInList);}
+    		
+    	}else {
+    		
+    	}
+    
     	return nearestPoints;
+        
+    	
     }
 
     @Override
     public boolean addPoint(Point point) {
-        //REVISE THIS
     	List<KDNode> visitedPoints = new ArrayList<KDNode>();
-    	insertNode(point, root, true, visitedPoints);
+    	if (isPointIn(point)) {
+    		return false;}
+    	else {
+    	KDNode rootNode = getRootNodeCat(point);
+    	insertNode(point, rootNode, rootNode, true, visitedPoints);
+    	
     	return true;
+    	}	
     }
     
-    public boolean insertNode(Point point, KDNode node, boolean checkLat, List<KDNode> visitedPoints) {
-    	if (node == null && root == null) {
-    		node = new KDNode(point, null, null, null);
-    		
+    public boolean insertNode(Point point, KDNode currentNode, KDNode rootNode, boolean checkLat, List<KDNode> visitedPoints) {
+    	
+    	//System.out.println(rootNode);
+    	if (rootNode == null) {
+    		if (point.cat == Category.RESTAURANT)
+    			rootResturant = new KDNode(point, null, null, null);
+    		else if(point.cat == Category.EDUCATION)
+    			rootEducation = new KDNode(point, null, null, null);
+    		else
+    			rootHospital = new KDNode(point, null, null, null);
     		return true;
-    	} else if (node == null) {
+    	} else if (currentNode == null) {
     		int index = visitedPoints.size() - 1;
-    		node = new KDNode(point, visitedPoints.get(index), null, null);
+    		currentNode = new KDNode(point, visitedPoints.get(index), null, null);
     	}
-    	else if (!isPointIn(node.point)) {
-    		return false;
-    	} else if (checkLat) {
-    		visitedPoints.add(node);
-    		if (point.lat < node.point.lat) {
-    			insertNode(point, node.leftChild, false, visitedPoints);
+    	else if (checkLat) {
+    		visitedPoints.add(currentNode);
+    		if (point.lat < currentNode.point.lat) {
+    			insertNode(point, currentNode.leftChild, rootNode, false, visitedPoints);
     		} else {
-    			insertNode(point, node.rightChild, false, visitedPoints);
+    			insertNode(point, currentNode.rightChild, rootNode, false, visitedPoints);
     		}
     	} else {
-    		visitedPoints.add(node);
-    		if (point.lon < node.point.lon) {
-    			insertNode(point, node.leftChild, true, visitedPoints);
+    		visitedPoints.add(currentNode);
+    		if (point.lon < currentNode.point.lon) {
+    			insertNode(point, currentNode.leftChild,rootNode, true, visitedPoints);
     		} else {
-    			insertNode(point, node.rightChild, true, visitedPoints);
+    			insertNode(point, currentNode.rightChild, rootNode, true, visitedPoints);
     		}
     	}
     	return false;
@@ -78,31 +101,55 @@ public class KDTreeNN implements NearestNeigh{
 
     @Override
     public boolean deletePoint(Point point) {
-        if (root == null)
-            return false;
-    	if (isPointIn(point) == false) {
-    		return false;
+    	boolean isTrue;
+    	if (point.cat == Category.RESTAURANT) 
+    	{
+    		isTrue = deletePointHelper(point, rootResturant);
+    		if (isTrue)
+    			rootResturant = deleteNode(point, rootResturant, true);
+    	    return isTrue;
     	}
-        root = deleteNode(point, root, true);
-        return true;
+    	
+    	else if(point.cat == Category.EDUCATION)
+    	{
+    		isTrue = deletePointHelper(point, rootEducation);
+    		if (isTrue)
+    			rootEducation = deleteNode(point, rootEducation, true);
+    	    return isTrue;
+    	}	
+    	else if(point.cat == Category.HOSPITAL)
+    	{
+    		isTrue = deletePointHelper(point, rootHospital);
+    		if (isTrue)
+    	    	rootHospital = deleteNode(point, rootHospital, true);
+    	    return isTrue;
+    	}
+    		
+    	return false;
 
     }
 
-    public KDNode deleteNode(Point point, KDNode node, boolean currentDim) {
-    	
-    	//checks if point exists
+    public boolean deletePointHelper(Point point, KDNode rootNode)
+    {
+	    if (rootNode == null)
+            return false;
     	if (isPointIn(point) == false) 
+    		return false;
+    	    
+    	 return true;
+    }
+    public KDNode deleteNode(Point point, KDNode currentNode, boolean checkLat) {
+    	if(currentNode == null)
     		return null;
-    	
-    	KDNode currentNode = root;
-    	
+    	//checks if point exists
+
     	//checks if point is root
     	if (currentNode.point.equals(point)) {
     		
     		if(currentNode.rightChild != null)
     		{
     		//find min of roots right subtree
-    		KDNode rightMin = findMinimum(currentNode.rightChild, currentDim, true);
+    		KDNode rightMin = findMinimum(currentNode.rightChild, checkLat, true);
     		//copy the min root
     		currentNode.point = rightMin.point;
     		
@@ -112,7 +159,7 @@ public class KDTreeNN implements NearestNeigh{
     		
     		else if(currentNode.leftChild != null) {	
     			//find min of roots right subtree
-    			KDNode leftMin = findMinimum(currentNode.leftChild, currentDim, true);
+    			KDNode leftMin = findMinimum(currentNode.leftChild, checkLat, true);
         		
         		//copy the min root
         		currentNode.point = leftMin.point;
@@ -123,9 +170,9 @@ public class KDTreeNN implements NearestNeigh{
     		else { //leaf node
     			return null;
     		}
-    		return root;
+    		return currentNode;
     	}
-    
+    	
     	if (checkLat == true)
     	{
     		if (point.lat < currentNode.point.lat)
@@ -140,7 +187,7 @@ public class KDTreeNN implements NearestNeigh{
         	else 
         		currentNode.rightChild = deleteNode(point, currentNode.rightChild, true);
     	}
-    	return root;
+    	return currentNode;
     }
     
 
@@ -183,8 +230,18 @@ public class KDTreeNN implements NearestNeigh{
 
         boolean isLatitude = true;
         KDNode newNode = new KDNode(point, null,null,null);
-        KDNode currentNode = root;
-       // if current node is null return false
+        KDNode currentNode = null;
+       
+    	if (point.cat == Category.RESTAURANT) 
+    		currentNode = rootResturant;
+    	
+    	else if(point.cat == Category.EDUCATION)
+    		currentNode = rootEducation;
+    	
+    	else if(point.cat == Category.HOSPITAL)
+    		currentNode = rootHospital;
+        
+        // if current node is null return false
         while (currentNode != null) {
         	
         	if (currentNode.equals(newNode)) 
@@ -216,9 +273,10 @@ public class KDTreeNN implements NearestNeigh{
 	{
 
 		double axisDist;
+		double comparedDist = -1;
 		KDNode nextBranch, otherBranch;
 		//returns nothing if root node is empty
-		if (root == null && root.parent == null) 
+		if (root == null) 
 			return nearestList;
 		if (checkLat == true)
 			if (searchTerm.lat < root.point.lat)
@@ -247,16 +305,33 @@ public class KDTreeNN implements NearestNeigh{
 		double currentDist = root.point.distTo(searchTerm);
 		List<PointDist> newNearestList = nearestList;
 		
-		PointDist comparedPoint = nearestList.get(k-1);
-		double comparedDist = root.point.distTo(comparedPoint.pointInList);
 		
-		if(nearestList.size() < k || currentDist < comparedDist )
+
+		
+//		if(nearestList.size() < k || currentDist < comparedDist )
+//		{
+//			PointDist addPointDist = new PointDist(root.point, currentDist) ;
+//			nearestList.add(addPointDist);
+//			nearestList = insertionSort(nearestList);
+//		}
+		
+		if(nearestList.size() < k) 
 		{
 			PointDist addPointDist = new PointDist(root.point, currentDist) ;
 			nearestList.add(addPointDist);
 			nearestList = insertionSort(nearestList);
-		}
+		}else {
+			PointDist comparedPoint = nearestList.get(k-1);
 		
+			comparedDist = root.point.distTo(comparedPoint.pointInList);
+			if(currentDist < comparedDist)
+			{
+				PointDist addPointDist = new PointDist(root.point, currentDist) ;
+				nearestList.add(addPointDist);
+				nearestList = insertionSort(nearestList);
+			}	
+		}
+
 		newNearestList = nearestNeighbour(nextBranch, searchTerm, !checkLat,  nearestList,  k );
 		
 		//calcualtes the distance from the last axis
@@ -290,6 +365,19 @@ public class KDTreeNN implements NearestNeigh{
         }
 		return nearestList;
 	}
+	 
+	 private KDNode getRootNodeCat(Point point) {
+	    	if (point.cat == Category.RESTAURANT) 
+	    		return rootResturant;	
+	    	
+	    	else if(point.cat == Category.EDUCATION)
+	    		return rootEducation;
+	    	
+	    	else 
+	    		return rootHospital;
+	    	
+	  
+	 }
 }
 
 //KD NODE CLASS
