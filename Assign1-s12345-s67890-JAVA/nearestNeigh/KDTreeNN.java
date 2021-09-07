@@ -75,39 +75,7 @@ public class KDTreeNN implements NearestNeigh{
     
     
 
-//    public boolean insertNode(Point point, KDNode rootNode, boolean checkLat) {
-//        KDNode newNode = new KDNode(point, null,null,null);
-//        
-//    	
-//    	if (rootNode == null) {
-//    		newNode = new KDNode(point, null, null, null);
-//    		return true;
-//    	} 
-//    	else if (isPointIn(point))
-//    		return false;
-//    	else if (checkLat == true) {
-//    		if (point.lat < rootNode.point.lat) {
-//    			if (rootNode.leftChild == null) {
-//    				new KDNode(point, rootNode, null, null);
-//    				rootNode.setLeftChild(leftChild);
-//    			}
-//    			else
-//    				insertNode(point, rootNode.leftChild, !checkLat);
-//    		} else {
-//    			if (rootNode.rightChild == null)
-//    				new KDNode(point, rootNode, null, null);
-//    			else
-//    				insertNode(point, rootNode.rightChild, !checkLat);
-//    		}
-//    	} else {
-//    		if (point.lon < node.point.lon) {
-//    			insertNode(point, node.leftChild, true);
-//    		} else {
-//    			insertNode(point, node.rightChild, true);
-//    		}
-//    	}
-//    	return false;
-//    }
+
     @Override
     public boolean deletePoint(Point point) {
         if (root == null)
