@@ -33,31 +33,40 @@ public class KDTreeNN implements NearestNeigh{
     @Override
     public boolean addPoint(Point point) {
         //REVISE THIS
-    	insertNode(point, root, true);
+    	List<KDNode> visitedPoints = new ArrayList<KDNode>();
+    	insertNode(point, root, true, visitedPoints);
     	return true;
     }
     
-    public boolean insertNode(Point point, KDNode node, boolean checkLat) {
-    	if (node == null) {
+    public boolean insertNode(Point point, KDNode node, boolean checkLat, List<KDNode> visitedPoints) {
+    	if (node == null && root == null) {
     		node = new KDNode(point, null, null, null);
     		return true;
-    	} else if (root.point == point) {
+    	} else if (node == null) {
+    		int index = visitedPoints.size() - 1;
+    		node = new KDNode(point, visitedPoints.get(index), null, null);
+    	}
+    	else if (!isPointIn(node.point)) {
     		return false;
     	} else if (checkLat) {
+    		visitedPoints.add(node);
     		if (point.lat < node.point.lat) {
-    			insertNode(point, node.leftChild, false);
+    			insertNode(point, node.leftChild, false, visitedPoints);
     		} else {
-    			insertNode(point, node.rightChild, false);
+    			insertNode(point, node.rightChild, false, visitedPoints);
     		}
     	} else {
+    		visitedPoints.add(node);
     		if (point.lon < node.point.lon) {
-    			insertNode(point, node.leftChild, true);
+    			insertNode(point, node.leftChild, true, visitedPoints);
     		} else {
-    			insertNode(point, node.rightChild, true);
+    			insertNode(point, node.rightChild, true, visitedPoints);
     		}
     	}
     	return false;
     }
+    
+    
 
     @Override
     public boolean deletePoint(Point point) {
