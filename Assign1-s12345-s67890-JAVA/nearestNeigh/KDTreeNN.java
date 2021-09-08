@@ -19,24 +19,54 @@ public class KDTreeNN implements NearestNeigh{
 	@Override
     public void buildIndex(List<Point> points) {
         		
-        for (Point p: points)
-        {  addPoint(p);
+
+        List<Point>restList = new ArrayList<Point>();
+        List<Point>eduList = new ArrayList<Point>();
+        List<Point>hospList = new ArrayList<Point>();
+        
+        
+        
+        for (Point p: points) {
+        	if (p.cat == Category.RESTAURANT) {
+        		restList.add(p);
+        	}
+        	else if (p.cat == Category.EDUCATION) {
+        		eduList.add(p);
+        	}
+        	else {
+        		hospList.add(p);  
+        	}
         }
-       // System.out.println(rootResturant.leftChild.point );
-       // System.out.println(rootResturant.rightChild.point.toString()  );
+        
+        addPoint(findMedian(restList));
+        addPoint(findMedian(eduList));
+        addPoint(findMedian(hospList));
+        
+        restList.remove(findMedian(restList));
+        eduList.remove(findMedian(eduList));
+        hospList.remove(findMedian(hospList));
+        
+        for (Point p: restList)
+        	addPoint(p);
+        
+        for (Point p: eduList)
+           addPoint(p);
+        
+        for (Point p: hospList)
+           addPoint(p);
+        
+
         //build a tree
     }
 
     @Override
     public List<Point> search(Point searchTerm, int k) {
        //get search term and find k amount of nearest neighbours
-    	//implemnt KD tree
     	List<PointDist> nearestNeighbours = new ArrayList<PointDist>();
     	List<Point>		nearestPoints = new ArrayList<Point>();
     	
     	nearestNeighbours = nearestNeighbour(getRootNodeCat(searchTerm), searchTerm, true , nearestNeighbours, k);
     	
-    	//fix this
     	if (nearestNeighbours != null)
     	{  for (PointDist p: nearestNeighbours)
     		{nearestPoints.add(p.pointInList);}
@@ -52,7 +82,7 @@ public class KDTreeNN implements NearestNeigh{
 
     @Override
     public boolean addPoint(Point point) {
-//    	List<KDNode> visitedPoints = new ArrayList<KDNode>();
+
     	if (isPointIn(point)) {
     		return false;}
     	else {
@@ -63,14 +93,11 @@ public class KDTreeNN implements NearestNeigh{
     	}	
     }
     
-    // TODO: fix null pointer exception. Possibly because the the child could be null, but we are trying to check the ".point" value
-    // of the child before checking if its null.
-    // Also, addPoint doesn't fail when the node is already in the kdtree.
+
     public boolean insertNode(Point point, KDNode currentNode, KDNode rootNode, boolean checkLat) {
     	
-    	//System.out.println(rootNode);
     	if (rootNode == null) {
-    		if (point.cat == Category.RESTAURANT)
+    		if (point.cat == Category.RESTAURANT) 
     			rootResturant = new KDNode(point, null, null, null);
     		else if(point.cat == Category.EDUCATION)
     			rootEducation = new KDNode(point, null, null, null);
@@ -80,15 +107,14 @@ public class KDTreeNN implements NearestNeigh{
     	} else {
     		
     		
-    		// Inverses dimension because we are figuring out which child sub tree the point belongs in.
-    		// checkLat is one layer behind!!!!!
     		if (checkLat) {
     			// Checks if the point belongs in the right child subtree
-    			if (point.lon > currentNode.point.lon) {
+    			if (point.lat > currentNode.point.lat) {
     				// If right child subtree is null/empty, creates a new node for the current point in the right
     				// child reference.
     				if (currentNode.rightChild == null) {
     					currentNode.rightChild = new KDNode(point, currentNode, null, null);
+    					
     					return true;
     				} 
     				// Calls the insert node method on the right child node.
@@ -97,7 +123,9 @@ public class KDTreeNN implements NearestNeigh{
     				}
     			} else {
     				if (currentNode.leftChild == null) {
+    					
     					currentNode.leftChild = new KDNode(point, currentNode, null, null);
+    					
     					return true;
     				}
     				else {
@@ -107,9 +135,10 @@ public class KDTreeNN implements NearestNeigh{
     		}
     		// Checks latitude if current node is ordered by longitude
     		else {
-    			if (point.lat > currentNode.point.lat) {
+    			if (point.lon > currentNode.point.lon) {
     				if (currentNode.rightChild == null) {
     					currentNode.rightChild = new KDNode(point, currentNode, null, null);
+    					
     					return true;
     				} 
     				// Calls the insert node method on the right child node.
@@ -119,6 +148,7 @@ public class KDTreeNN implements NearestNeigh{
     			} else {
     				if (currentNode.leftChild == null) {
     					currentNode.leftChild = new KDNode(point, currentNode, null, null);
+    					
     					return true;
     				}
     				else {
@@ -260,10 +290,10 @@ public class KDTreeNN implements NearestNeigh{
     }
 
 	@Override
-    public boolean isPointIn(Point point) {
+	public boolean isPointIn(Point point) {
 
         boolean isLatitude = true;
-        KDNode newNode = new KDNode(point, null,null,null);
+       
         KDNode currentNode = null;
        
     	if (point.cat == Category.RESTAURANT) 
@@ -278,12 +308,12 @@ public class KDTreeNN implements NearestNeigh{
         // if current node is null return false
         while (currentNode != null) {
         	
-        	if (currentNode.equals(newNode)) 
+        	if (currentNode.point.equals(point)) 
         		return true;
         
         	if (isLatitude == true)
         	{ 
-        		if (newNode.point.lat < currentNode.point.lat) 
+        		if (point.lat < currentNode.point.lat) 
         		{ currentNode = currentNode.leftChild;}
         		else
         		{currentNode = currentNode.rightChild;}
@@ -291,7 +321,7 @@ public class KDTreeNN implements NearestNeigh{
         	}
         	else 
         	{ 
-        		if (newNode.point.lon < currentNode.point.lon)
+        		if (point.lon < currentNode.point.lon)
         		{ currentNode = currentNode.leftChild;}
         		else
         		{currentNode = currentNode.rightChild;}
@@ -302,85 +332,88 @@ public class KDTreeNN implements NearestNeigh{
         return false;
     }
 
-	private List<PointDist> nearestNeighbour(KDNode root, Point searchTerm, boolean checkLat, List<PointDist> nearestList, int k)
-//	private List<KDNode> nearestNeighbour(KDNode root, Point searchTerm, boolean checkLat, int k)
+	private List<PointDist> nearestNeighbour(KDNode currentNode, Point searchTerm, boolean checkLat, List<PointDist> nearestList, int k)
 	{
 
 		double axisDist;
-		double comparedDist = -1;
+	
 		KDNode nextBranch, otherBranch;
+		
 		//returns nothing if root node is empty
-		if (root == null) 
+		if (currentNode == null) 
 			return nearestList;
 		if (checkLat == true)
-			if (searchTerm.lat < root.point.lat)
+			if (searchTerm.lat < currentNode.point.lat)
 			{
-				nextBranch = root.leftChild;
-				otherBranch = root.rightChild;
+				nextBranch = currentNode.leftChild;
+				otherBranch = currentNode.rightChild;
 			}
 			else
 			{
-				nextBranch = root.rightChild;
-				otherBranch = root.leftChild;
+				nextBranch = currentNode.rightChild;
+				otherBranch = currentNode.leftChild;
 			}
 		else {
-			if (searchTerm.lon < root.point.lon)
+			if (searchTerm.lon < currentNode.point.lon)
 			{
-				nextBranch = root.leftChild;
-				otherBranch = root.rightChild;
+				nextBranch = currentNode.leftChild;
+				otherBranch = currentNode.rightChild;
 			}
 			else
 			{
-				nextBranch = root.rightChild;
-				otherBranch = root.leftChild;
+				nextBranch = currentNode.rightChild;
+				otherBranch = currentNode.leftChild;
 			}
 		}
 		
-		double currentDist = root.point.distTo(searchTerm);
-		List<PointDist> newNearestList = nearestList;
+		double currentDist = currentNode.point.distTo(searchTerm);
+		List<PointDist> tempNearestList = nearestList;
 		
+		tempNearestList = nearestNeighbour(nextBranch, searchTerm, !checkLat,  nearestList,  k );
+		List<PointDist> bestList = findBestNode(tempNearestList, currentNode, searchTerm, currentDist, k);		
 		
-
-		
-//		if(nearestList.size() < k || currentDist < comparedDist )
-//		{
-//			PointDist addPointDist = new PointDist(root.point, currentDist) ;
-//			nearestList.add(addPointDist);
-//			nearestList = insertionSort(nearestList);
-//		}
-		
-		if(nearestList.size() < k) 
-		{
-			PointDist addPointDist = new PointDist(root.point, currentDist) ;
-			nearestList.add(addPointDist);
-			nearestList = insertionSort(nearestList);
-		}else {
-			PointDist comparedPoint = nearestList.get(k-1);
-		
-			comparedDist = root.point.distTo(comparedPoint.pointInList);
-			if(currentDist < comparedDist)
-			{
-				PointDist addPointDist = new PointDist(root.point, currentDist) ;
-				nearestList.add(addPointDist);
-				nearestList = insertionSort(nearestList);
-			}	
-		}
-
-		newNearestList = nearestNeighbour(nextBranch, searchTerm, !checkLat,  nearestList,  k );
-		
+		if (currentNode.parent != null) {
 		//calcualtes the distance from the last axis
-		if (checkLat == true)
-			 axisDist = searchTerm.lat - root.point.lat;
-		else
-			axisDist = searchTerm.lon - root.point.lon;
-		
-		if (comparedDist >= axisDist)
-			newNearestList = nearestNeighbour(otherBranch, searchTerm, !checkLat,  nearestList,  k );
-		
-		return newNearestList;	
+			if (checkLat == true) 
+				axisDist = searchTerm.lat - currentNode.parent.point.lat;
+			else
+				axisDist = searchTerm.lon - currentNode.parent.point.lon;
+			
+			if (currentDist >= axisDist){	
+			tempNearestList = nearestNeighbour(otherBranch, searchTerm, !checkLat,  nearestList,  k );
+			}
+		}
+		return bestList;	
 		
 	}
 	
+	
+	 private List<PointDist> findBestNode(List<PointDist> tempNearestList, KDNode currentNode, Point searchTerm ,double currentDist, int k){
+		 double comparedDist = -1;	
+
+		 if(tempNearestList.size() < k) 
+			{
+				PointDist addPointDist = new PointDist(currentNode.point, currentDist) ;
+				
+				tempNearestList.add(addPointDist);
+				tempNearestList = insertionSort(tempNearestList);
+			}else {
+				PointDist comparedPoint = tempNearestList.get(k-1);
+				
+				comparedDist = searchTerm.distTo(comparedPoint.pointInList);
+				if(currentDist < comparedDist)
+				{
+					tempNearestList.remove(comparedPoint);
+					PointDist addPointDist = new PointDist(currentNode.point, currentDist) ;
+					tempNearestList.add(addPointDist);
+					tempNearestList = insertionSort(tempNearestList);
+				}	
+			}
+		 return tempNearestList;
+		 
+	 }
+	 
+	 
 	 List<PointDist> insertionSort(List<PointDist> nearestList) {
 		//Insertion sort because array will always be sorted
 		
@@ -390,8 +423,8 @@ public class KDTreeNN implements NearestNeigh{
         	key.pointInList = nearestList.get(i).pointInList;
         	key.dist = nearestList.get(i).dist;
             int j = i ;
- 
-            while (j >= 0 && (nearestList.get(j-1).dist > key.dist)) {
+
+            while (j > 0 && (nearestList.get(j-1).dist > key.dist)) {
                 nearestList.set(j, nearestList.get(j-1));
             	j--;
             }
@@ -399,6 +432,28 @@ public class KDTreeNN implements NearestNeigh{
         }
 		return nearestList;
 	}
+	 
+	 private Point findMedian(List<Point> listToSort){
+		 	
+			int n = listToSort.size();
+	        for (int i = 1; i < n; ++i) {
+	        	Point key = listToSort.get(i);
+	        	
+	            int j = i ;
+
+	            while (j > 0 && (listToSort.get(j-1).lat > key.lat)) {
+	                listToSort.set(j, listToSort.get(j-1));
+	            	j--;
+	            }
+	            listToSort.set(j, key);
+	        }
+	        int index = listToSort.size() % 2 == 0 ? listToSort.size() / 2 -1: listToSort.size() / 2;
+
+	        System.out.println(index);
+			return listToSort.get(index);
+		}
+		 
+
 	 
 	 private KDNode getRootNodeCat(Point point) {
 	    	if (point.cat == Category.RESTAURANT) 
@@ -428,29 +483,6 @@ class KDNode {
     	this.rightChild = rightChild;
     }
 
-	 // Removed encapsulation and getter/setter methods for now. Can change this back if we have time l8r
-	public KDNode getLeftChild() {
-    	return leftChild;
-    }    
-	public void setLeftChild(KDNode leftChild) {
-		this.leftChild = leftChild;
-	}
-
-	public KDNode getRightChild() {
-    	return rightChild;
-		
-	}
-	public void setRightChild(KDNode rightChild) {
-		this.rightChild = rightChild;
-	}
-	public Point getPoint() {
-		return point;
-	}
-	
-
-	public void setParent(KDNode parent) {
-		this.parent = parent;
-	}
 }
 class PointDist{
 	public Point pointInList;
@@ -460,9 +492,6 @@ class PointDist{
 		this.pointInList = pointInList;
 		this.dist = dist; 
 	}
-
-
-
 
 }
 
