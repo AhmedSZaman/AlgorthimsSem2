@@ -112,7 +112,7 @@ public class NearestNeighFileBased2 {
                             writer.println(writePoint.toString());
                         }
                         long endNNTime = System.nanoTime();
-                        System.out.println("Nearest Point:" +((double)( endNNTime - startNNTime))  );
+                        System.out.println("Nearest Point:" +((double)( endNNTime - startNNTime)) / Math.pow(10, 9));
                         break;
                     // add
                     case "A":
