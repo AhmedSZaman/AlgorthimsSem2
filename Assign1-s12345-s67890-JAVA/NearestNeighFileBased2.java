@@ -97,6 +97,7 @@ public class NearestNeighFileBased2 {
                 switch (command) {
                     // search
                     case "S":
+                    	long startNNTime = System.nanoTime();
                         cat = Point.parseCat(scanner.next());
                         lat = scanner.nextDouble();
                         lon = scanner.nextDouble();
@@ -106,9 +107,12 @@ public class NearestNeighFileBased2 {
                         for (Point writePoint : searchResult) {
                             writer.println(writePoint.toString());
                         }
+                        long endNNTime = System.nanoTime();
+                        System.out.println("Search Point:" +((double)( endNNTime - startNNTime)) / Math.pow(10, 9) );
                         break;
                     // add
                     case "A":
+                    	long startATime = System.nanoTime();
                         id = scanner.next();
                         cat = Point.parseCat(scanner.next());
                         lat = scanner.nextDouble();
@@ -117,9 +121,12 @@ public class NearestNeighFileBased2 {
                         if (!agent.addPoint(point)) {
                             writer.println("Add point failed.");
                         }
+                        long endATime = System.nanoTime();
+                        System.out.println("Add Point:" +((double)( endATime - startATime)) / Math.pow(10, 9) );
                         break;
                     // delete
                     case "D":
+                    	long startDTime = System.nanoTime();
                         id = scanner.next();
                         cat = Point.parseCat(scanner.next());
                         lat = scanner.nextDouble();
@@ -128,15 +135,20 @@ public class NearestNeighFileBased2 {
                         if (!agent.deletePoint(point)) {
                             writer.println("Delete point failed.");
                         }
+                        long endDTime = System.nanoTime();
+                        System.out.println("Delete Point:" +((double)( endDTime - startDTime)) / Math.pow(10, 9) );
                         break;
                     // check
                     case "C":
+                    	long startSTime = System.nanoTime();
                         id = scanner.next();
                         cat = Point.parseCat(scanner.next());
                         lat = scanner.nextDouble();
                         lon = scanner.nextDouble();
                         point = new Point(id, cat, lat, lon);
                         writer.println(agent.isPointIn(point));
+                        long endSTime = System.nanoTime();
+                        System.out.println("Search Point:" +((double)( endSTime - startSTime)) / Math.pow(10, 9) );
                         break;
                     default:
                         System.err.println("Unknown command.");
