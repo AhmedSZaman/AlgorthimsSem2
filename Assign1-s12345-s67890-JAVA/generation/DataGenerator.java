@@ -11,13 +11,13 @@ public class DataGenerator {
 		//Changed code to fit needs
 		Date currentDate = new Date();
 		Random generator = new Random(currentDate.getTime());
-		int datasetSize = 10000;
+		int datasetSize = 100000;
 		final double latMin = -39.0;
 		final double latMax = -36.0;
 		final double lonMin = 141.0;
 		final double lonMax = 149.0;
 		
-		try (PrintWriter writer = new PrintWriter(new File("largeDataset.txt"))) {
+		try (PrintWriter writer = new PrintWriter(new File("xlargeDataset.txt"))) {
 			for (int i = 0; i < datasetSize; i ++) {
 				double newLat = latMin + (latMax - latMin) * generator.nextDouble();
 				double newLon = lonMin + (lonMax - lonMin) * generator.nextDouble();
