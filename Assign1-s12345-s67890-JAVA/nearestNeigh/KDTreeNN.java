@@ -81,14 +81,14 @@ public class KDTreeNN implements NearestNeigh {
 
 	@Override
 	public boolean addPoint(Point point) {
-		long startTime = System.nanoTime();
+	
 		if (isPointIn(point)) {
 			return false;
 		} else {
 			KDNode rootNode = getRootNode(point);
 			insertNode(point, rootNode, rootNode, true);
-	        long endTime = System.nanoTime();
-	        System.out.println(((double)(ADD: endTime - startTime)) / Math.pow(10, 9) ); 
+	       
+	       
 			return true;
 		}
 	}
