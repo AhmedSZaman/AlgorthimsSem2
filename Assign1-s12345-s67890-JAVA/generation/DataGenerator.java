@@ -8,6 +8,7 @@ import java.io.IOException;
 public class DataGenerator {
 
 	public static void main(String[] args) {
+		//Changed code to fit needs
 		Date currentDate = new Date();
 		Random generator = new Random(currentDate.getTime());
 		int datasetSize = 10000;
