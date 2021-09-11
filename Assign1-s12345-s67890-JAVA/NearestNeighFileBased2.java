@@ -41,6 +41,7 @@ public class NearestNeighFileBased2 {
         }
 
         // initialise search agent
+   
         NearestNeigh agent = null;
         switch (args[0]) {
             case "naive":
@@ -53,7 +54,6 @@ public class NearestNeighFileBased2 {
                 System.err.println("Incorrect argument value.");
                 usage(progName);
         }
-
         // read in data file of initial set of points
         String dataFileName = args[1];
         List<Point> points = new ArrayList<Point>();
@@ -67,7 +67,11 @@ public class NearestNeighFileBased2 {
                 points.add(point);
             }
             scanner.close();
+            long startBuildTime = System.nanoTime();
             agent.buildIndex(points);
+            long endBuildTime = System.nanoTime();
+            long buildTimeDiff = endBuildTime - startBuildTime;
+            System.out.println("build index:" +((double)(buildTimeDiff )) / Math.pow(10, 9) );
         } catch (FileNotFoundException e) {
             System.err.println("Data file doesn't exist.");
             usage(progName);
@@ -108,7 +112,7 @@ public class NearestNeighFileBased2 {
                             writer.println(writePoint.toString());
                         }
                         long endNNTime = System.nanoTime();
-                        System.out.println("Search Point:" +((double)( endNNTime - startNNTime)) / Math.pow(10, 9) );
+                        System.out.println("Nearest Point:" +((double)( endNNTime - startNNTime))  );
                         break;
                     // add
                     case "A":
@@ -140,15 +144,15 @@ public class NearestNeighFileBased2 {
                         break;
                     // check
                     case "C":
-                    	long startSTime = System.nanoTime();
+                    	long startCTime = System.nanoTime();
                         id = scanner.next();
                         cat = Point.parseCat(scanner.next());
                         lat = scanner.nextDouble();
                         lon = scanner.nextDouble();
                         point = new Point(id, cat, lat, lon);
                         writer.println(agent.isPointIn(point));
-                        long endSTime = System.nanoTime();
-                        System.out.println("Search Point:" +((double)( endSTime - startSTime)) / Math.pow(10, 9) );
+                        long endCTime = System.nanoTime();
+                        System.out.println("Search Point:" +((double)( endCTime - startCTime)) / Math.pow(10, 9) );
                         break;
                     default:
                         System.err.println("Unknown command.");
