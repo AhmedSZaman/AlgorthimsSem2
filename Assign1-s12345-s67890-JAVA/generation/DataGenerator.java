@@ -13,6 +13,7 @@ public class DataGenerator {
 		Random generator = new Random(currentDate.getTime());
 
 		int datasetSize = 10;
+
 		final double latMin = -39.0;
 		final double latMax = -36.0;
 		final double lonMin = 141.0;
