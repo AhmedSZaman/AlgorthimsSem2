@@ -35,11 +35,13 @@ public class NearestNeighFileBased2 {
      */
     public static void main(String[] args) {
         // read command line arguments
+
         if (args.length != 4) {
             System.err.println("Incorrect number of arguments.");
             usage(progName);
         }
 
+        
         // initialise search agent
    
         NearestNeigh agent = null;
@@ -112,6 +114,7 @@ public class NearestNeighFileBased2 {
                             writer.println(writePoint.toString());
                         }
                         long endNNTime = System.nanoTime();
+
                         System.out.println("Nearest Point:" +((double)( endNNTime - startNNTime)) / Math.pow(10, 9));
                         break;
                     // add
